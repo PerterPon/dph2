@@ -1,8 +1,27 @@
+/*
+  mock
+  Author: PerterPon<PerterPon@gmail.com>
+  Create: Sun Jun 17 2018 14:58:36 GMT+0800 (CST)
+*/
 
-export class Test {
+import * as pm2 from 'pm2';
+import * as log4js from 'log4js';
+import * as Util from 'src/core/util';
 
-    constructor() {
-        console.log( 'test12345' );
-    }
-    
+async function start() {
+
+    const dphConfig: { [ name: string ]: any } = await Util.parseDPHConfig();
+
+    configLog(  );
+
 }
+
+function configLog( logConfig:  ): void {
+
+}
+
+function startPm2(): void {
+
+}
+
+start();
