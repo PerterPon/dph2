@@ -24,4 +24,3 @@ test: build-test
 test-cov: build-test
 	cd $(TEST_FOLDER) && \
 	$(ISTANBUL) cover $(_MOCHA) tests/test-*.js
-	open $(TEST_FOLDER)/coverage/lcov-report/index.html || $$PWD
