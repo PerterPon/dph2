@@ -1,13 +1,14 @@
 {
 	"name": "dph2",
 	"devDependencies": {
-		"mocha": "5.2.0",
-		"typescript": "~2.9.x",
+		"@types/js-yaml": "*",
+		"@types/lodash": "*",
 		"@types/mocha": "*",
 		"@types/node": "*",
-		"@types/lodash": "*",
 		"@types/promise": "*",
-		"@types/js-yaml" : "*"
+		"istanbul": "^0.4.5",
+		"mocha": "5.2.0",
+		"typescript": "~2.9.x"
 	},
 	"dependencies": {
 		"ccxt": "~1.12.x",

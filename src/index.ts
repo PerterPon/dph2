@@ -1,3 +1,8 @@
-import * as _ from 'lodash';
 
-import * as Moment from 'moment';
+export class Test {
+
+    constructor() {
+        console.log( 'test12345' );
+    }
+    
+}
