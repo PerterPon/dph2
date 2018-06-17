@@ -12,11 +12,9 @@ async function start() {
 
     const dphConfig: { [ name: string ]: any } = await Util.parseDPHConfig();
 
-    configLog(  );
-
 }
 
-function configLog( logConfig:  ): void {
+function configLog(): void {
 
 }
 
