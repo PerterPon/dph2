@@ -29,7 +29,7 @@ export function sleep( time: number ): Promise<void> {
 }
 
 export async function parseDPHConfig( envFile?: string ): Promise<Object> {
-    const defaultFilePath: string = path.join( __dirname, '../../etc/defailt.yaml' );
+    const defaultFilePath: string = path.join( __dirname, '../../etc/default.yaml' );
     const defaultFileContent: string = await asyncReadFile( defaultFilePath, 'utf-8' );
     const defaultConfig: DocumentLoadResult = safeLoad( defaultFileContent );
 

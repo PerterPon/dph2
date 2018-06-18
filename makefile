@@ -21,21 +21,26 @@ build-test:
 
 test: build-test
 	cd $(TEST_FOLDER) && \
-	$(MOCHA) tests/test-*.js
+	NODE_PATH=$(TEST_FOLDER) $(MOCHA) tests/test-*.js
 
 test-cov: build-test
 	cd $(TEST_FOLDER) && \
-	$(ISTANBUL) cover $(_MOCHA) tests/test-*.js
+	NODE_PATH=$(TEST_FOLDER) $(ISTANBUL) cover $(_MOCHA) tests/test-*.js
 
 dev: build-ts
-	node src/index.js
+	cd $(DIRNAME)/build && \
+	NODE_PATH=$(BUILD_FOLDER) node src/index.js
+	@echo "dev start success!s"
 
 start: build-ts
-	nohup node src/index.js &;
+	$(PM2) stop all || echo "no running process found"
+	$(PM2) delete all || echo "no running process found"
+	@cd $(DIRNAME)/build && \
+	NODE_PATH=$(BUILD_FOLDER) $(PM2) start etc/pm2.config.yaml
+	@echo "start success!"
 
 status:
 	$(PM2) ls
 
 restart:
 	$(PM2) restart
-
