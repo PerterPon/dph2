@@ -1,16 +1,21 @@
 log:
     pm2: false
     appenders:
-        master:
-            type: "console"
-        main:
-            type: "console"
-        polling:
-            type: "console"
+        stdout:
+            type: "stdout"
     categories:
         default:
-            appenders: [ "master", "main", "polling" ]
+            appenders: [ "stdout" ]
             level: 'ALL'
+        master:
+            appenders: [ "stdout" ]
+            level: "ALL"
+        main:
+            appenders: [ "stdout" ]
+            level: "ALL"
+        polling:
+            appenders: [ "stdout" ]
+            level: "ALL"
 
 ipc:
     master:

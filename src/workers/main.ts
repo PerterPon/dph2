@@ -6,18 +6,17 @@
 
 import { Worker } from './worker';
 
+import { ProcessName } from 'src/enums/main';
+
 export class MainWorker extends Worker {
 
-    
+    public name: ProcessName = ProcessName.MAIN;
 
 }
 
 async function start(): Promise<void> {
     const main: MainWorker = new MainWorker();
     await main.init();
-    setTimeout( () => {
-
-    }, 1000000000 );
 }
 
 start();

@@ -32,7 +32,8 @@ export function sleep( time: number ): Promise<void> {
  * @param envFile 
  */
 export async function parseDPHConfig( envFile?: string ): Promise<TDPHConfig> {
-    const defaultFilePath: string = path.join( __dirname, '../../etc/default.yaml' );
+    const etcPath: string = getEtcFolderPath();
+    const defaultFilePath: string = path.join( etcPath, '/default.yaml' );
     const defaultFileContent: string = await fs.readFile( defaultFilePath, 'utf-8' );
     const defaultConfig: DocumentLoadResult = safeLoad( defaultFileContent );
 
@@ -54,6 +55,11 @@ export async function parseDPHConfig( envFile?: string ): Promise<TDPHConfig> {
  */
 export async function mkdirp( folderPath: fs.PathLike ): Promise<void> {
     await fs.mkdirp( <string>folderPath );
+}
+
+export function getEtcFolderPath(): string {
+    const etcPath: string = path.join( __dirname, '../../etc' );
+    return etcPath;
 }
 
 export function getOutFolderPath(): string {

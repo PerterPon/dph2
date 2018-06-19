@@ -6,7 +6,13 @@
 
 import { Worker } from './worker';
 
+import { ProcessName } from 'src/enums/main';
+
 export class PollingWorker extends Worker {
+
+    public name: ProcessName = ProcessName.POLLING;
+
+    
 
 }
 

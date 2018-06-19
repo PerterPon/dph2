@@ -36,7 +36,6 @@ async function initOutFolder( config: TDPHConfig ): Promise<void> {
 main();
 
 process.on( 'uncaughtException', ( error: Error ) => {
-
     const logger: Logger = getLogger();
     logger.error( `uncaught exception\n${error.message}\n${error.stack}` );
 
@@ -44,5 +43,5 @@ process.on( 'uncaughtException', ( error: Error ) => {
 
 process.on( 'unhandledRejection', ( reason: any, promise: Promise<any> ) => {
     const logger: Logger = getLogger();
-    
+    logger.error( `unhandled rejection, reason: [${ reason }]` );
 } );

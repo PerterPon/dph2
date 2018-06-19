@@ -31,6 +31,8 @@ export abstract class Worker {
         await this.parseConfig();
         this.initLogger();
         this.connectMaster();
+
+        this.logger.info( `process: [${ this.name }] init success.` );
     }
 
     protected async parseConfig(): Promise<void> {
