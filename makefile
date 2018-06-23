@@ -25,7 +25,7 @@ test: build-test
 
 test-test: build-test
 	cd $(TEST_FOLDER) && \
-	NODE_PATH=$(TEST_FOLDER) $(MOCHA) tests/test-ccxt-pricer.js
+	NODE_PATH=$(TEST_FOLDER) $(MOCHA) tests/test-db.js
 
 test-cov: build-test
 	cd $(TEST_FOLDER) && \
@@ -33,14 +33,15 @@ test-cov: build-test
 
 dev: build-ts
 	cd $(DIRNAME)/build && \
-	NODE_PATH=$(BUILD_FOLDER) node src/index.js
-	@echo "dev start success!s"
+	NODE_PATH=$(BUILD_FOLDER) node src/index.js --env dev
+	@echo "dev start success!"
 
 start: build-ts
 	$(PM2) stop all || echo "no running process found"
 	$(PM2) delete all || echo "no running process found"
 	@cd $(DIRNAME)/build && \
-	NODE_PATH=$(BUILD_FOLDER) $(PM2) start etc/pm2.config.yaml
+	@# NODE_PATH=$(BUILD_FOLDER) $(PM2) start etc/pm2.config.yaml
+	NODE_PATH=$(BUILD_FOLDER) node src/index.js --env prod
 	@echo "start success!"
 
 status:

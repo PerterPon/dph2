@@ -38,3 +38,10 @@ exchanges:
             maker: 0.001
         apiKey: ''
         apiSecret : ''
+
+database:
+    host: ''
+    username: ''
+    password: ''
+    port: ''
+    database: ''

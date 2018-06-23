@@ -13,10 +13,10 @@ import { Logger } from 'log4js';
 
 const logger: Logger = getLogger();
 
-export function IPCBufferHandler<T>( bufferData: Buffer ): T {
+export function IPCBufferHandler<T>( bufferData: Buffer ): IPCStruct<T> {
     const dataString: string = bufferData.toString();
     const data: IPCStruct<T> = JSON.parse( dataString );
-    return IPCHandler<T>( data );
+    return data;
 }
 
 export function IPCBufferWrapper<T>( data: T, event: IPCEvent, success: boolean = true, errorCode: IPCErrorCode = IPCErrorCode.NONE, errorMessage: string = '' ): Buffer {
@@ -27,9 +27,8 @@ export function IPCBufferWrapper<T>( data: T, event: IPCEvent, success: boolean 
     return messageBuffer;
 }
 
-export function IPCHandler<T>( IPCMessage: IPCStruct<T> ): T {
+export function IPCHandler<T>( IPCMessage: IPCStruct<T> ): IPCStruct<T> {
     const errorCode: IPCErrorCode = IPCMessage.errorCode as IPCErrorCode;
-    const data: T = IPCMessage.data;
     const errorMessage: string = IPCMessage.errorMessage as string;
     const success: boolean = IPCMessage.success;
     if ( false === success ) {
@@ -39,7 +38,7 @@ export function IPCHandler<T>( IPCMessage: IPCStruct<T> ): T {
         throw error;
     }
 
-    return data;
+    return IPCMessage;
 }
 
 export function IPCWrapper<T>( data: T, event: IPCEvent, success: boolean = true, errorCode: IPCErrorCode = IPCErrorCode.NONE, errorMessage: string = '' ): IPCStruct<T> {

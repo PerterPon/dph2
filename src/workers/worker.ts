@@ -11,8 +11,8 @@ import * as Util from 'src/core/util';
 import { initLogger, getLogger } from 'src/core/log';
 import { initConfig, getConfig } from 'src/core/config';
 import { ProcessName } from 'src/enums/main';
-import { IPCBufferHandler, IPCBufferWrapper } from 'src/core/ipc-handler';
-import { initExchanges } from 'src/core/exchange';
+import { IPCBufferHandler, IPCBufferWrapper, IPCHandler } from 'src/core/ipc-handler';
+import { initDb } from 'src/core/db';
 
 import { TDPHConfig, TProcessRegister } from 'main-types';
 import { Logger } from 'log4js';
@@ -30,7 +30,6 @@ export abstract class Worker {
         await this.parseConfig();
         this.initLogger();
         this.connectMaster();
-        await this.initExchanges();
 
         const logger: Logger = getLogger();
         logger.info( `process: [${ this.name }] init success.` );
@@ -64,11 +63,11 @@ export abstract class Worker {
     }
 
     /**
-     * init all exchanges
+     * init db
      */
-    protected async initExchanges(): Promise<void> {
+    protected async initDb(): Promise<void> {
         const config: TDPHConfig = getConfig();
-        await initExchanges( config );
+        initDb( config.database );
     }
 
     /**
@@ -120,10 +119,11 @@ export abstract class Worker {
 
     /**
      * on master ipc message
-     * @param data 
+     * @param data
      */
     private onMasterData( data: Buffer ): void {
         const IPCMessage: IPCStruct<any> = IPCBufferHandler( data );
+        IPCHandler( IPCMessage );
         if ( IPCEvent.START_WORKER === IPCMessage.event ) {
             this.start();
         } else {

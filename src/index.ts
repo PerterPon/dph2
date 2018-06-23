@@ -5,7 +5,6 @@
 */
 
 import * as commander from 'commander';
-import * as path from 'path';
 
 import { initConfig } from 'src/core/config';
 import * as Util from 'src/core/util';
@@ -24,11 +23,11 @@ commander
 async function main(): Promise<void> {
     const dphConfig: TDPHConfig = await initConfig( commander.env );
     initLogger( dphConfig, ProcessName.MASTER );
-    await initOutFolder( dphConfig );
+    await initOutFolder();
     await pullUpMaster();
 }
 
-async function initOutFolder( config: TDPHConfig ): Promise<void> {
+async function initOutFolder(): Promise<void> {
     const outPath: string = Util.getOutFolderPath();
     await Util.mkdirp( outPath );
 }
@@ -38,7 +37,6 @@ main();
 process.on( 'uncaughtException', ( error: Error ) => {
     const logger: Logger = getLogger();
     logger.error( `uncaught exception\n${error.message}\n${error.stack}` );
-
 } );
 
 process.on( 'unhandledRejection', ( reason: any, promise: Promise<any> ) => {

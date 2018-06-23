@@ -12,7 +12,7 @@ import * as path from 'path';
 import { getLogger } from 'src/core/log';
 import { getConfig } from 'src/core/config';
 import * as Util from 'src/core/util';
-import { IPCHandler } from 'src/core/ipc-handler';
+import { IPCBufferHandler, IPCHandler, IPCBufferWrapper } from 'src/core/ipc-handler';
 
 import { IPCEvent } from 'src/enums/util';
 import { ProcessName } from 'src/enums/main';
@@ -20,12 +20,15 @@ import { ProcessName } from 'src/enums/main';
 import { Logger } from 'log4js';
 import { TDPHConfig, TProcessRegister, TProcessConfig } from 'main-types';
 import { IPCStruct } from 'util-types';
+import { Socket } from 'net';
 
 export async function pullUpMaster(): Promise<void> {
     await listen();
     await pullUpSubprocess( ProcessName.MAIN );
     await pullUpSubprocess( ProcessName.POLLING );
 }
+
+const sockMap: Map<string, Socket> = new Map();
 
 async function pullUpSubprocess( name: string ): Promise<void> {
 
@@ -51,16 +54,16 @@ async function listen(): Promise<void> {
 
     const logger: Logger = getLogger();
 
-    const app = net.createServer( ( socket: net.Socket ) => {
+    const app = net.createServer( ( socket: Socket ) => {
 
         socket.on( 'close', ( had_error: boolean ) => {
             logger.error( `A UDS connection was disconnected!, has error: [${ had_error }]` );
         } );
 
         socket.on( 'data', ( data: Buffer ) => {
-            const dataContent: string = data.toString();
-            const jsonData: IPCStruct<any> = JSON.parse( dataContent );
-            dealIPC( jsonData );
+            const IPCData: IPCStruct<any> = IPCBufferHandler( data );
+            IPCHandler( IPCData );
+            dealIPC( IPCData, socket );
         } );
 
         socket.on( 'connect', () => {
@@ -70,24 +73,39 @@ async function listen(): Promise<void> {
     } );
 
     app.listen( sockPath );
-
 }
 
-async function dealIPC<T>( data: IPCStruct<T> ): Promise<void> {
+async function dealIPC<T>( data: IPCStruct<T>, sock: Socket ): Promise<void> {
     const logger: Logger = getLogger();
     try {
         const IPCData: any = IPCHandler( data );
         const { event } = data;
         if ( IPCEvent.REGISTER_PROCESS === event ) {
-            await dealProcessRegister( IPCData as TProcessRegister );
+            await dealProcessRegister( IPCData as TProcessRegister, sock );
         }
     } catch ( e ) {
         logger.error( `parse ipc data error: [${ e.message }] \n${ e.stack }` );
     }
 }
 
-async function dealProcessRegister( data: TProcessRegister ): Promise<void> {
+async function dealProcessRegister( data: TProcessRegister, sock: Socket ): Promise<void> {
     const logger: Logger = getLogger();
     const name: ProcessName = data.name;
     logger.info( `process: [${ name }] has registered to master!` );
+    sockMap.set( name, sock );
+    await doStartWorker( name );
+}
+
+async function doStartWorker( name: string ): Promise<void> {
+    const workingData: Buffer = IPCBufferWrapper( name, IPCEvent.START_WORKER );
+    const sock: Socket|undefined = sockMap.get( name );
+    if ( undefined === sock ) {
+        const error: Error = new Error( `trying to start worker: [${ name }], but can not found the socket!` );
+        throw error;
+    }
+    const result: boolean = sock.write( workingData );
+    if ( false === result ) {
+        const error: Error = new Error( `trying to sending start worker single to: [${ name }], but failed!` );
+        throw error;
+    }
 }

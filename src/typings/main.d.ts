@@ -22,11 +22,21 @@ declare module 'main-types' {
     },
     exchanges: {
       [name: string]: TExchangeConfig;
-    }
+    },
+    database: TDataBaseConfig;
   };
 
   export type TProcessRegister = {
     name: ProcessName;
+  };
+
+  export type TDataBaseConfig = {
+    host: string;
+    user: string;
+    password: string;
+    database?: string;
+    port?: number;
+    showLog: boolean;
   };
 
 }
