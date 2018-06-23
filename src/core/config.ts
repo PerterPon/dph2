@@ -13,19 +13,17 @@ import { TDPHConfig } from 'main-types';
 
 let config: TDPHConfig = {} as TDPHConfig;
 
-export async function fetchConfig( env?: string ): Promise<TDPHConfig> {
+export async function initConfig( env?: string ): Promise<TDPHConfig> {
     config = await Util.parseDPHConfig( env );
 
     return config;
 }
 
-export async function fetchCurrentConfig(): Promise<TDPHConfig> {
-
+export function getConfig(): TDPHConfig {
     if ( true === _.isEmpty( config ) ) {
         const error: Error = new Error( 'config is null!' );
         throw error;
     }
 
     return config;
-
 }

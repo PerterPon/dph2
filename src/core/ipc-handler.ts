@@ -13,6 +13,20 @@ import { Logger } from 'log4js';
 
 const logger: Logger = getLogger();
 
+export function IPCBufferHandler<T>( bufferData: Buffer ): T {
+    const dataString: string = bufferData.toString();
+    const data: IPCStruct<T> = JSON.parse( dataString );
+    return IPCHandler<T>( data );
+}
+
+export function IPCBufferWrapper<T>( data: T, event: IPCEvent, success: boolean = true, errorCode: IPCErrorCode = IPCErrorCode.NONE, errorMessage: string = '' ): Buffer {
+    const IPCMessage: IPCStruct<T> = IPCWrapper( data, event, success, errorCode, errorMessage );
+
+    const message: string = JSON.stringify( IPCMessage );
+    const messageBuffer: Buffer = new Buffer( message );
+    return messageBuffer;
+}
+
 export function IPCHandler<T>( IPCMessage: IPCStruct<T> ): T {
     const errorCode: IPCErrorCode = IPCMessage.errorCode as IPCErrorCode;
     const data: T = IPCMessage.data;
@@ -28,7 +42,7 @@ export function IPCHandler<T>( IPCMessage: IPCStruct<T> ): T {
     return data;
 }
 
-export function IPCWrapper<T>( data: T, event: IPCEvent, success: boolean = true, errorCode: IPCErrorCode = IPCErrorCode.NONE, errorMessage: string = '' ): Buffer {
+export function IPCWrapper<T>( data: T, event: IPCEvent, success: boolean = true, errorCode: IPCErrorCode = IPCErrorCode.NONE, errorMessage: string = '' ): IPCStruct<T> {
     const IPCMessage: IPCStruct<T> = {
         event,
         data,
@@ -37,7 +51,5 @@ export function IPCWrapper<T>( data: T, event: IPCEvent, success: boolean = true
         errorMessage
     };
 
-    const message: string = JSON.stringify( IPCMessage );
-    const messageBuffer: Buffer = new Buffer( message );
-    return messageBuffer;
+    return IPCMessage;
 }

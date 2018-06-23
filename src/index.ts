@@ -7,7 +7,7 @@
 import * as commander from 'commander';
 import * as path from 'path';
 
-import { fetchConfig } from 'src/core/config';
+import { initConfig } from 'src/core/config';
 import * as Util from 'src/core/util';
 import { initLogger, getLogger } from 'src/core/log';
 import { pullUpMaster } from './master';
@@ -22,7 +22,7 @@ commander
     .parse( process.argv );
 
 async function main(): Promise<void> {
-    const dphConfig: TDPHConfig = await fetchConfig( commander.env );
+    const dphConfig: TDPHConfig = await initConfig( commander.env );
     initLogger( dphConfig, ProcessName.MASTER );
     await initOutFolder( dphConfig );
     await pullUpMaster();

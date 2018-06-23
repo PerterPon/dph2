@@ -23,6 +23,10 @@ test: build-test
 	cd $(TEST_FOLDER) && \
 	NODE_PATH=$(TEST_FOLDER) $(MOCHA) tests/test-*.js
 
+test-test: build-test
+	cd $(TEST_FOLDER) && \
+	NODE_PATH=$(TEST_FOLDER) $(MOCHA) tests/test-ccxt-pricer.js
+
 test-cov: build-test
 	cd $(TEST_FOLDER) && \
 	NODE_PATH=$(TEST_FOLDER) $(ISTANBUL) cover $(_MOCHA) tests/test-*.js

@@ -24,3 +24,17 @@ ipc:
         file: main
     polling:
         file: polling
+
+exchanges:
+    bitfinex:
+        fees:
+            taker: 0.001
+            maker: 0.002
+        apiKey: ''
+        apiSecret: ''
+    binance:
+        fees:
+            taker: 0.001
+            maker: 0.001
+        apiKey: ''
+        apiSecret : ''

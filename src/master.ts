@@ -1,3 +1,4 @@
+
 /*
 * Master
 * Author: yuhan.wyh<yuhan.wyh@alibaba-inc.com>
@@ -9,7 +10,7 @@ import * as net from 'net';
 import * as path from 'path';
 
 import { getLogger } from 'src/core/log';
-import { fetchCurrentConfig } from 'src/core/config';
+import { getConfig } from 'src/core/config';
 import * as Util from 'src/core/util';
 import { IPCHandler } from 'src/core/ipc-handler';
 
@@ -30,7 +31,7 @@ async function pullUpSubprocess( name: string ): Promise<void> {
 
     const logger: Logger = getLogger();
     const workerPath: string = Util.getWorkersFolderPath();
-    const config: TDPHConfig = await fetchCurrentConfig();
+    const config: TDPHConfig = await getConfig();
     const processConfig: TProcessConfig = config.ipc[ name ];
     const targetFile: string = path.join( workerPath, processConfig.file );
     const subArgv: Array<string> = process.argv.slice();
@@ -45,7 +46,7 @@ async function pullUpSubprocess( name: string ): Promise<void> {
 }
 
 async function listen(): Promise<void> {
-    const config: TDPHConfig = await fetchCurrentConfig();
+    const config: TDPHConfig = await getConfig();
     const sockPath: string = Util.getMasterSockPath( <string>config.ipc.master.sock );
 
     const logger: Logger = getLogger();

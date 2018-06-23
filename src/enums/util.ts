@@ -11,5 +11,6 @@ export enum IPCErrorCode {
 
 export enum IPCEvent {
     REGISTER_PROCESS = 'register_process',
+    START_WORKER = 'start_worker'
 }
 

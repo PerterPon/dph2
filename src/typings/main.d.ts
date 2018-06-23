@@ -7,7 +7,8 @@
 
 declare module 'main-types' {  
   import { ProcessName } from 'src/enums/main';
-  import { Configuration } from 'log4js';
+  import { Configuration as TLogConfiguration } from 'log4js';
+  import { TExchangeConfig } from 'exchange-types';
 
   export type TProcessConfig = {
     file: string;
@@ -15,9 +16,12 @@ declare module 'main-types' {
   };
 
   export type TDPHConfig = {
-    log: Configuration,
+    log: TLogConfiguration,
     ipc: {
       [name: string]: TProcessConfig;
+    },
+    exchanges: {
+      [name: string]: TExchangeConfig;
     }
   };
 
