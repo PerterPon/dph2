@@ -17,7 +17,7 @@ import { Logger } from 'log4js';
 import { TDPHConfig } from 'main-types';
 
 commander
-    .option( '-v, --env', 'running env' )
+    .option( '-v, --env [value]', 'running env' )
     .parse( process.argv );
 
 async function main(): Promise<void> {
