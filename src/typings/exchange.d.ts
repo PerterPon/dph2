@@ -4,9 +4,9 @@ declare module 'exchange-types' {
     import { Market, Exchange } from 'ccxt';
 
     export type TExchange = {
-        markets ?: TMarkets;
+        markets : TMarkets;
         fees: TFees;
-        exchange?: Exchange;
+        exchange: Exchange;
     };
 
     export type TMarkets = {

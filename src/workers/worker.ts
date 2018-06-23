@@ -37,7 +37,7 @@ export abstract class Worker {
 
     protected async parseConfig(): Promise<void> {
         commander.parse( process.argv );
-        initConfig( commander.env );
+        await initConfig( commander.env );
     }
 
     /**
@@ -132,3 +132,14 @@ export abstract class Worker {
     }
 
 }
+
+process.on( 'uncaughtException', ( error: Error ) => {
+    const logger: Logger = getLogger();
+    logger.error( `uncaught exception\n${ error.message }\n${ error.stack }` );
+} );
+
+process.on( 'unhandledRejection', ( reason: any, promise: Promise<any> ) => {
+    const logger: Logger = getLogger();
+    logger.error( `unhandled rejection, reason: [${ reason }]` );
+} );
+

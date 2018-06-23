@@ -32,15 +32,16 @@ export function sleep( time: number ): Promise<void> {
  * 
  * @param envFile 
  */
-export async function parseDPHConfig( envFile?: string ): Promise<TDPHConfig> {
+export async function parseDPHConfig( env?: string ): Promise<TDPHConfig> {
     const etcPath: string = getEtcFolderPath();
     const defaultFilePath: string = path.join( etcPath, '/default.yaml' );
     const defaultFileContent: string = await fs.readFile( defaultFilePath, 'utf-8' );
     const defaultConfig: DocumentLoadResult = safeLoad( defaultFileContent );
 
     let dphConfig: DocumentLoadResult = {};
-    if ( true === _.isString( envFile ) ) {
-        const envFileContent: string = await fs.readFile( envFile as string, 'utf-8' );
+    if ( true === _.isString( env ) ) {
+        const envFilePath: string = path.join( etcPath, `/${ env }.yaml` );
+        const envFileContent: string = await fs.readFile( envFilePath, 'utf-8' );
         const envConfig: DocumentLoadResult = safeLoad( envFileContent );
         dphConfig = _.merge( defaultConfig, envConfig );
     } else {

@@ -6,5 +6,6 @@
 */
 
 import { initDb } from 'src/core/db';
+import * as db from 'fresh-mysql';
 
-console.log( initDb );
+console.log( db );

@@ -44,7 +44,9 @@ async function pullUpSubprocess( name: string ): Promise<void> {
     let subProcess: childProcess.ChildProcess = childProcess.fork( `${ targetFile }.js`, subArgv );
     subProcess.once( 'exit', ( code: string, single: string ) => {
         logger.error( `process: [${ name }] down! repulling up...` );
-        pullUpSubprocess( name );
+        setTimeout( () => {
+            pullUpSubprocess( name );
+        }, 5 * 1000 );
     } );
 }
 
@@ -75,13 +77,12 @@ async function listen(): Promise<void> {
     app.listen( sockPath );
 }
 
-async function dealIPC<T>( data: IPCStruct<T>, sock: Socket ): Promise<void> {
+async function dealIPC( data: IPCStruct<any>, sock: Socket ): Promise<void> {
     const logger: Logger = getLogger();
     try {
-        const IPCData: any = IPCHandler( data );
         const { event } = data;
         if ( IPCEvent.REGISTER_PROCESS === event ) {
-            await dealProcessRegister( IPCData as TProcessRegister, sock );
+            await dealProcessRegister( data.data as TProcessRegister, sock );
         }
     } catch ( e ) {
         logger.error( `parse ipc data error: [${ e.message }] \n${ e.stack }` );
