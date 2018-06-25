@@ -27,3 +27,12 @@ export enum StandardCoin {
     USD = 'USD',
     BTC = 'BTC'
 }
+
+export enum TradeType {
+    SELL,
+    BUY
+}
+
+export enum StrategyType {
+    TH
+}

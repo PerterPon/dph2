@@ -6,7 +6,11 @@
 */
 
 declare module 'main-types' {  
-  import { ProcessName, DPHCoin, StandardCoin, DPHExchange } from 'src/enums/main';
+
+  import { BaseStrategy } from 'src/strategies/base-strategy';
+  import { BaseTrader } from 'src/traders/base-trader';
+
+  import { ProcessName, DPHCoin, StandardCoin, DPHExchange, StrategyType } from 'src/enums/main';
   import { Configuration as TLogConfiguration } from 'log4js';
   import { TFees } from 'exchange-types';
   import { TPricerSymbols } from 'pricer-types';
@@ -51,5 +55,9 @@ declare module 'main-types' {
     name: ProcessName;
   };
 
+  export type TStrategySeries = {
+    strategy: BaseStrategy;
+    trader: BaseTrader;
+  };
 
 }

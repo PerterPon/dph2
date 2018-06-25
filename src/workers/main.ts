@@ -3,32 +3,45 @@
 * Author: yuhan.wyh<yuhan.wyh@alibaba-inc.com>
 * Create: Mon Jun 18 2018 13:40:06 GMT+0800 (CST)
 */
+import chalk from 'chalk';
+
+import { Worker } from './worker';
 
 import { getConfig } from 'src/core/config';
 import { getLogger } from 'src/core/log';
-import { ProcessName, StandardCoin, DPHExchange } from 'src/enums/main';
+
+// pricers
 import { BasePricer } from 'src/pricers/base-pricer';
 import { CCXTPricer } from 'src/pricers/ccxt-pricer';
-import { Worker } from './worker';
 
+// strategys
+import { BaseStrategy } from 'src/strategies/base-strategy';
+import { THStrategy } from 'src/strategies/th-strategy';
+
+// traders
+import { BaseTrader } from 'src/traders/base-trader';
+import { THTrader } from 'src/traders/th-trader';
+
+import { ProcessName, StandardCoin, DPHExchange, StrategyType } from 'src/enums/main';
 import { DPHCoin } from 'src/enums/main';
 
-import { TDPHConfig, TExchangeConfig } from 'main-types';
+import { TDPHConfig, TStrategySeries } from 'main-types';
 import { Logger } from 'log4js';
-import { TExchange } from 'exchange-types';
-import { TPricerSymbols } from 'pricer-types';
-import { OrderBook, ExchangeError } from 'ccxt';
+import { OrderBook } from 'ccxt';
+import { TTradeActions } from 'trader-types';
 
 export class MainWorker extends Worker {
     public name: ProcessName = ProcessName.MAIN;
 
     private pricers: Map<DPHExchange, BasePricer> = new Map();
+    private strategies: Map<StrategyType, TStrategySeries> = new Map();
 
     // overwrite
     protected async start(): Promise<void> {
         const log: Logger = getLogger();
         log.info( `worker: [${ this.name }] got work single from master, start working ...` );
         await this.initPricer();
+        await this.initStrategyAndTrader();
         await this.startTrade();
     }
 
@@ -50,6 +63,30 @@ export class MainWorker extends Worker {
         log.info( 'all pricers init done!' );
     }
 
+    protected async initStrategyAndTrader(): Promise<void> {
+        const log: Logger = getLogger();
+        log.info( 'initing strategys ...' );
+
+        // TODO: support more strategy later
+        const strategies: Array<StrategyType> = [ StrategyType.TH ];
+        for( let i = 0; i < strategies.length; i ++ ) {
+            const strategy: StrategyType = strategies[ i ];
+            if ( strategy === StrategyType.TH ) {
+                const thStrategy: BaseStrategy = new THStrategy();
+                await thStrategy.init();
+                const thTrader: BaseTrader = new THTrader();
+                await thTrader.init();
+                const strategySeries: TStrategySeries = {
+                    strategy: thStrategy,
+                    trader: thTrader
+                };
+                this.strategies.set( strategy, strategySeries );
+            }
+        }
+
+        log.info( 'all strategy and traders init done!' );
+    }
+
     protected async startTrade(): Promise<void> {
         const log: Logger = getLogger();
         log.log( 'all init done! start trade ...' );
@@ -62,46 +99,43 @@ export class MainWorker extends Worker {
             const standardCoin: StandardCoin = supportedStandard[ i ];
             for( let j = 0; j < supportedCoin.length; j ++ ) {
                 const coin: DPHCoin = supportedCoin[ j ];
-                const orderBooks: Map<DPHExchange, OrderBook> = await this.fetchSupportedOrderBook( standardCoin, coin );
-                console.log( orderBooks );
+                // 这里不用await监听，因为listen会进行while循环，否则会导致无法监听所有pricer
+                this.listenPrice( standardCoin, coin );
             }
         }
-
     }
 
-    protected async fetchSupportedOrderBook( standardCoin: StandardCoin, coin: DPHCoin ): Promise<Map<DPHExchange, OrderBook>> {
-        
+    protected async listenPrice( standardCoin: StandardCoin, coin: DPHCoin ): Promise<void> {
+        const log: Logger = getLogger();
+
+        log.info( `start listening price for coin: [${ chalk.yellow( coin ) }] ` );
+
         const config: TDPHConfig = getConfig();
-        const { supportedExchange, exchanges } = config;
+        const { supportedExchange } = config;
+        const { strategies } = this;
 
-        const obLoaders: Array<Promise<OrderBook>> = [];
-
-        for ( let i = 0; i < supportedExchange.length; i ++ ) {
-            const exchangeName: DPHExchange = supportedExchange[ i ];
-            if ( void( 0 ) == exchanges[ exchangeName ] ) {
-                const error: Error = new Error( `trying to fetch order book with exchange: [${ exchangeName }], but not configured yet!` );
-                throw error;
-            }
-
-            const pricer: BasePricer = this.getPricer( exchangeName );
-            obLoaders.push( pricer.fetchOrderBook( standardCoin, coin ) );
-
-        }
-
-        const results: Array<OrderBook> = await Promise.all( obLoaders );
-        const resOrderBooks: Map<DPHExchange, OrderBook> = new Map();
-
+        // while( true ) {
         for( let i = 0; i < supportedExchange.length; i ++ ) {
             const exchangeName: DPHExchange = supportedExchange[ i ];
-            resOrderBooks.set( exchangeName, results[ i ] );
+            const pricer: BasePricer = this.getPricer( exchangeName );
+            const orderBook: OrderBook = await pricer.fetchOrderBook( standardCoin, coin );
+            for ( let [ strategy, strategySeries ] of strategies ) {
+                const strategier: BaseStrategy = strategySeries.strategy;
+                const trader: BaseTrader = strategySeries.trader;
+
+                const action: TTradeActions | null = await strategier.updateOrderBook( standardCoin, coin, exchangeName, orderBook );
+                if ( null === action ) {
+                    continue;
+                }
+
+                await trader.trade( action );
+            }
         }
-        
-        return resOrderBooks;
+        // }
 
     }
 
     private getPricer( name: DPHExchange ): BasePricer {
-
         const pricer: BasePricer | undefined = this.pricers.get( name );
         if ( undefined === pricer ) {
             const error: Error = new Error( `trying to get exchange: [${ name }], but not inited yet!` );
@@ -109,7 +143,6 @@ export class MainWorker extends Worker {
         }
 
         return pricer;
-
     }
 
 }
