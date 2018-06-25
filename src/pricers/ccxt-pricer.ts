@@ -29,6 +29,7 @@ export class CCXTPricer extends BasePricer {
         if ( standardCoin === StandardCoin.USD ) {
             symbols = config.USDSymbols;
         } else if ( standardCoin === StandardCoin.BTC ) {
+            throw new Error( `standard coin: [ ${ StandardCoin.BTC } ] is not support yet!` );
             // TODO: later support
         }
 
