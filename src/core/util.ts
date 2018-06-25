@@ -10,7 +10,6 @@ import { DocumentLoadResult, safeLoad } from 'js-yaml';
 import * as _ from 'lodash';
 
 import { TDPHConfig } from 'main-types';
-import { TExchanges, TExchangeConfig } from 'exchange-types';
 
 export type AsyncReadFileResult = ( path: string, encodeing: string ) => Promise<string>;
 

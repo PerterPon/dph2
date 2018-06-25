@@ -11,3 +11,19 @@ export enum ProcessName {
     MAIN = 'main',
     POLLING = 'polling'
 }
+
+export enum DPHExchange {
+    UNKNOW = 'unknow',
+    BITFINEX = 'bitfinex',
+    BINANCE = 'binance'
+}
+
+export enum DPHCoin {
+    BTC = "BTC",
+    ETH = "ETH"
+}
+
+export enum StandardCoin {
+    USD = 'USD',
+    BTC = 'BTC'
+}

@@ -6,14 +6,10 @@
 */
 
 declare module 'main-types' {  
-  import { ProcessName } from 'src/enums/main';
+  import { ProcessName, DPHCoin, StandardCoin, DPHExchange } from 'src/enums/main';
   import { Configuration as TLogConfiguration } from 'log4js';
-  import { TExchangeConfig } from 'exchange-types';
-
-  export type TProcessConfig = {
-    file: string;
-    sock?: string;
-  };
+  import { TFees } from 'exchange-types';
+  import { TPricerSymbols } from 'pricer-types';
 
   export type TDPHConfig = {
     log: TLogConfiguration,
@@ -23,11 +19,23 @@ declare module 'main-types' {
     exchanges: {
       [name: string]: TExchangeConfig;
     },
+    supportedCoin: Array<DPHCoin>;
+    supportedStandard: Array<StandardCoin>;
+    supportedExchange: Array<DPHExchange>;
     database: TDataBaseConfig;
   };
 
-  export type TProcessRegister = {
-    name: ProcessName;
+  export type TProcessConfig = {
+    file: string;
+    sock?: string;
+  };
+
+  export type TExchangeConfig = {
+    fees: TFees;
+    apiKey: string;
+    apiSecret: string;
+    USDSymbols: TPricerSymbols;
+    BTCSymbols: TPricerSymbols;
   };
 
   export type TDataBaseConfig = {
@@ -38,5 +46,10 @@ declare module 'main-types' {
     port?: number;
     showLog: boolean;
   };
+
+  export type TProcessRegister = {
+    name: ProcessName;
+  };
+
 
 }

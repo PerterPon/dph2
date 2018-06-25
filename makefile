@@ -25,7 +25,7 @@ test: build-test
 
 test-test: build-test
 	cd $(TEST_FOLDER) && \
-	NODE_PATH=$(TEST_FOLDER) $(MOCHA) tests/test-db.js
+	NODE_PATH=$(TEST_FOLDER) $(MOCHA) tests/test-ccxt.js
 
 test-cov: build-test
 	cd $(TEST_FOLDER) && \

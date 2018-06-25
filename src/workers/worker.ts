@@ -8,6 +8,7 @@ import * as commander from 'commander';
 import * as net from 'net';
 
 import * as Util from 'src/core/util';
+import { initExchanges } from 'src/core/exchange';
 import { initLogger, getLogger } from 'src/core/log';
 import { initConfig, getConfig } from 'src/core/config';
 import { ProcessName } from 'src/enums/main';
@@ -29,10 +30,13 @@ export abstract class Worker {
     public async init(): Promise<void> {
         await this.parseConfig();
         this.initLogger();
-        this.connectMaster();
-
+        await this.initExchanges();
+        
         const logger: Logger = getLogger();
         logger.info( `process: [${ this.name }] init success.` );
+
+        // all init done, register to master
+        this.connectMaster();
     }
 
     protected async parseConfig(): Promise<void> {
@@ -68,6 +72,16 @@ export abstract class Worker {
     protected async initDb(): Promise<void> {
         const config: TDPHConfig = getConfig();
         initDb( config.database );
+    }
+
+    /**
+     * init all exchanges
+     */
+    protected async initExchanges(): Promise<void> {
+        const log: Logger = getLogger();
+        log.info( `initing exchanges ...` );
+        const config: TDPHConfig = getConfig();
+        await initExchanges( config );
     }
 
     /**
@@ -141,5 +155,6 @@ process.on( 'uncaughtException', ( error: Error ) => {
 process.on( 'unhandledRejection', ( reason: any, promise: Promise<any> ) => {
     const logger: Logger = getLogger();
     logger.error( `unhandled rejection, reason: [${ reason }]` );
+    console.log( reason, promise );
 } );
 

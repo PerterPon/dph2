@@ -9,9 +9,10 @@ import * as ccxt from 'ccxt';
 import { getLogger } from 'src/core/log';
 
 import { Exchange, Market } from 'ccxt';
-import { TExchanges, TExchange, TMarkets, TExchangeConfig } from 'exchange-types';
-import { TDPHConfig } from 'main-types';
+import { TExchanges, TExchange, TMarkets } from 'exchange-types';
+import { TDPHConfig, TExchangeConfig } from 'main-types';
 import { Logger } from 'log4js';
+import { DPHExchange } from '../enums/main';
 
 const allExchanges: TExchanges = new Map();
 
@@ -20,9 +21,10 @@ const allExchanges: TExchanges = new Map();
  * @param config 
  */
 export async function initExchanges( config: TDPHConfig ): Promise<void> {
-    const { exchanges } = config;
+    const { exchanges, supportedExchange } = config;
     const log: Logger = getLogger();
-    for( let name in exchanges ) {
+    for( let i = 0; i < supportedExchange.length; i ++ ) {
+        const name: DPHExchange = supportedExchange[ i ];
         if ( false === name in ccxt ) {
             const error: Error = new Error( `trying to init exchange: [${ name }], but can not found in ccxt!` );
             throw error;
@@ -33,7 +35,8 @@ export async function initExchanges( config: TDPHConfig ): Promise<void> {
         const exchangeConfig: TExchangeConfig = exchanges[ name ];
         const ccxtExchange: Exchange = new ( ccxt as any )[ name ]( {
             apiKey: exchangeConfig.apiKey,
-            secret: exchangeConfig.apiSecret
+            secret: exchangeConfig.apiSecret,
+            timeout: 30 * 1000
         } );
 
         const markets: TMarkets = await ccxtExchange.loadMarkets();
@@ -43,7 +46,7 @@ export async function initExchanges( config: TDPHConfig ): Promise<void> {
             markets: markets
         };
         log.info( `exchange: [${ name }] init done!` );
-        allExchanges.set( name, exchange );
+        allExchanges.set( <DPHExchange>name, exchange );
     }
 }
 
@@ -51,7 +54,7 @@ export async function initExchanges( config: TDPHConfig ): Promise<void> {
  * get exchange by name
  * @param name 
  */
-export function getExchange( name: string ): TExchange {
+export function getExchange( name: DPHExchange ): TExchange {
     const exchange: TExchange|undefined = allExchanges.get( name );
     if ( undefined === exchange ) {
         const error: Error = new Error( `trying to get exchange: [${ name }], but it not exists!` );
