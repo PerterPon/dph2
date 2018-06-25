@@ -25,6 +25,16 @@ ipc:
     polling:
         file: polling
 
+supportedStandard:
+    - "USD"
+
+supportedCoin:
+    - "BTC"
+
+supportedExchange:
+    - "bitfinex"
+    - "binance"
+
 exchanges:
     bitfinex:
         fees:
@@ -32,12 +42,18 @@ exchanges:
             maker: 0.002
         apiKey: ''
         apiSecret: ''
+        USDSymbols: 
+            BTC : 'BTC/USD'
+            LTC : 'LTC/USD'
+            ETH : 'ETH/USD'
     binance:
         fees:
             taker: 0.001
             maker: 0.001
         apiKey: ''
         apiSecret : ''
+        USDSymbols:
+            BTC : 'BTC/USDT'
 
 database:
     host: ''
