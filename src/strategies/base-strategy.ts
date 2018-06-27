@@ -11,6 +11,14 @@ import { OrderBook } from 'ccxt';
 
 export abstract class BaseStrategy {
 
+    protected strategyConfig: {
+        [name: string] : any
+    } = {};
+
+    constructor( config: { [name: string] : any } ) {
+        this.strategyConfig = config;
+    }
+
     public async init():Promise<void> {
 
     }

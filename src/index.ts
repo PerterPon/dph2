@@ -5,6 +5,7 @@
 */
 
 import * as commander from 'commander';
+import * as fs from 'fs-extra';
 
 import { initConfig } from 'src/core/config';
 import * as Util from 'src/core/util';
@@ -29,6 +30,7 @@ async function main(): Promise<void> {
 
 async function initOutFolder(): Promise<void> {
     const outPath: string = Util.getOutFolderPath();
+    fs.removeSync( outPath );
     await Util.mkdirp( outPath );
 }
 

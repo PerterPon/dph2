@@ -41,13 +41,18 @@ async function pullUpSubprocess( name: string ): Promise<void> {
     subArgv.unshift();
     subArgv.unshift();
 
-    let subProcess: childProcess.ChildProcess = childProcess.fork( `${ targetFile }.js`, subArgv );
-    subProcess.once( 'exit', ( code: string, single: string ) => {
-        logger.error( `process: [${ name }] down! repulling up...` );
-        setTimeout( () => {
-            pullUpSubprocess( name );
-        }, 5 * 1000 );
-    } );
+    // DEBUG mode will not active multi process
+    if ( 'true' === process.env.DEBUG ) {
+        require( targetFile );
+    } else {
+        let subProcess: childProcess.ChildProcess = childProcess.fork( `${ targetFile }.js`, subArgv );
+        subProcess.once( 'exit', ( code: string, single: string ) => {
+            logger.error( `process: [${ name }] down! repulling up...` );
+            setTimeout( () => {
+                pullUpSubprocess( name );
+            }, 5 * 1000 );
+        } );
+    }
 }
 
 async function listen(): Promise<void> {

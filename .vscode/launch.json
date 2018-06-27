@@ -16,8 +16,10 @@
                 "--env=dev",
             ],
             "env": {
-                "NODE_PATH": "${workspaceFolder}/build"
-            }
+                "NODE_PATH": "${workspaceFolder}/build",
+                "DEBUG": "true"
+            },
+            "console":"integratedTerminal"
         },
     ]
 }

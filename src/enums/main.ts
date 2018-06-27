@@ -34,5 +34,5 @@ export enum TradeType {
 }
 
 export enum StrategyType {
-    TH
+    TH = 'TH'
 }

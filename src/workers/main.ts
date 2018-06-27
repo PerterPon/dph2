@@ -6,9 +6,11 @@
 import chalk from 'chalk';
 
 import { Worker } from './worker';
+import * as util from 'src/core/util';
 
 import { getConfig } from 'src/core/config';
 import { getLogger } from 'src/core/log';
+import { getExchange } from 'src/core/exchange';
 
 // pricers
 import { BasePricer } from 'src/pricers/base-pricer';
@@ -27,8 +29,9 @@ import { DPHCoin } from 'src/enums/main';
 
 import { TDPHConfig, TStrategySeries } from 'main-types';
 import { Logger } from 'log4js';
-import { OrderBook } from 'ccxt';
+import { OrderBook, Market } from 'ccxt';
 import { TTradeActions } from 'trader-types';
+import { TExchange, TMarkets } from 'exchange-types';
 
 export class MainWorker extends Worker {
     public name: ProcessName = ProcessName.MAIN;
@@ -66,13 +69,15 @@ export class MainWorker extends Worker {
     protected async initStrategyAndTrader(): Promise<void> {
         const log: Logger = getLogger();
         log.info( 'initing strategys ...' );
+        const config: TDPHConfig = getConfig();
+        const { strategyConfig } = config;
 
         // TODO: support more strategy later
         const strategies: Array<StrategyType> = [ StrategyType.TH ];
         for( let i = 0; i < strategies.length; i ++ ) {
             const strategy: StrategyType = strategies[ i ];
             if ( strategy === StrategyType.TH ) {
-                const thStrategy: BaseStrategy = new THStrategy();
+                const thStrategy: BaseStrategy = new THStrategy( strategyConfig[ strategy ] );
                 await thStrategy.init();
                 const thTrader: BaseTrader = new THTrader();
                 await thTrader.init();
@@ -114,24 +119,29 @@ export class MainWorker extends Worker {
         const { supportedExchange } = config;
         const { strategies } = this;
 
-        // while( true ) {
-        for( let i = 0; i < supportedExchange.length; i ++ ) {
-            const exchangeName: DPHExchange = supportedExchange[ i ];
-            const pricer: BasePricer = this.getPricer( exchangeName );
-            const orderBook: OrderBook = await pricer.fetchOrderBook( standardCoin, coin );
-            for ( let [ strategy, strategySeries ] of strategies ) {
-                const strategier: BaseStrategy = strategySeries.strategy;
-                const trader: BaseTrader = strategySeries.trader;
-
-                const action: TTradeActions | null = await strategier.updateOrderBook( standardCoin, coin, exchangeName, orderBook );
-                if ( null === action ) {
+        while( true ) {
+            await util.sleep( 1 * 1000 );
+            for( let i = 0; i < supportedExchange.length; i ++ ) {
+                const exchangeName: DPHExchange = supportedExchange[ i ];
+                const pricer: BasePricer = this.getPricer( exchangeName );
+                const orderBook: OrderBook|null = await pricer.fetchOrderBook( standardCoin, coin );
+                if ( null === orderBook ) {
                     continue;
                 }
 
-                await trader.trade( action );
+                for ( let [ strategy, strategySeries ] of strategies ) {
+                    const strategier: BaseStrategy = strategySeries.strategy;
+                    const trader: BaseTrader = strategySeries.trader;
+
+                    const action: TTradeActions|null = await strategier.updateOrderBook( standardCoin, coin, exchangeName, orderBook );
+                    if ( null === action ) {
+                        continue;
+                    }
+
+                    await trader.trade( action );
+                }
             }
         }
-        // }
 
     }
 

@@ -33,7 +33,7 @@ export abstract class BasePricer {
         process.nextTick( this.propertyCheck.bind( this ) );
     }
 
-    public async fetchOrderBook( standardCoin: StandardCoin, coin: DPHCoin ): Promise<OrderBook> {
+    public async fetchOrderBook( standardCoin: StandardCoin, coin: DPHCoin ): Promise<OrderBook|null> {
         throw new Error( `pricer: [${ this.name }] must implements method: fetchOrderBook` );
     }
 

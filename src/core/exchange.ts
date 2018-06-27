@@ -36,7 +36,7 @@ export async function initExchanges( config: TDPHConfig ): Promise<void> {
         const ccxtExchange: Exchange = new ( ccxt as any )[ name ]( {
             apiKey: exchangeConfig.apiKey,
             secret: exchangeConfig.apiSecret,
-            timeout: 30 * 1000
+            enableRateLimit: true
         } );
 
         const markets: TMarkets = await ccxtExchange.loadMarkets();

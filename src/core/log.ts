@@ -17,6 +17,10 @@ let logger: log4js.Logger = {} as log4js.Logger;
 
 export function initLogger( config: TDPHConfig, loggerName?: ProcessName ): log4js.Logger {
     log4js.configure( config.log );
+    // DEBUG mode
+    if ( 'true' === process.env.DEBUG ) {
+        loggerName = undefined;
+    }
     logger = log4js.getLogger( loggerName );
     return logger
 }

@@ -33,7 +33,7 @@ test-cov: build-test
 
 dev: build-ts
 	cd $(DIRNAME)/build && \
-	NODE_PATH=$(BUILD_FOLDER) node src/index.js --env dev
+	NODE_PATH=$(BUILD_FOLDER) DEBUG="true" node src/index.js --env dev
 	@echo "dev start success!"
 
 start: build-ts

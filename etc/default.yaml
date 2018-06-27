@@ -27,33 +27,86 @@ ipc:
 
 supportedStandard:
     - "USD"
+    - "BTC"
 
 supportedCoin:
-    - "BTC"
+    - "ETH"
 
 supportedExchange:
     - "bitfinex"
     - "binance"
+    - "zb"
+    - "bittrex"
+    - "bitstamp"
+    - "huobipro"
 
 exchanges:
     bitfinex:
         fees:
-            taker: 0.001
-            maker: 0.002
+            buy: 0.002
+            sell: 0.002
         apiKey: ''
         apiSecret: ''
         USDSymbols: 
             BTC : 'BTC/USD'
             LTC : 'LTC/USD'
             ETH : 'ETH/USD'
+        BTCSymbols:
+            ETH : 'ETH/BTC'
     binance:
         fees:
-            taker: 0.001
-            maker: 0.001
+            buy: 0.001
+            sell: 0.001
         apiKey: ''
         apiSecret : ''
         USDSymbols:
             BTC : 'BTC/USDT'
+        BTCSymbols:
+            ETH : 'ETH/BTC'
+    zb:
+        fees:
+            buy: 0.002
+            sell: 0.002
+        USDSymbols:
+            BTC: 'BTC/USDT'
+        BTCSymbols:
+            ETH : 'ETH/BTC'
+    okex:
+        fees:
+            buy: 0.002
+            sell: 0.002
+        USDSymbols:
+            BTC: 'BTC/USDT'
+        BTCSymbols:
+            ETH : 'ETH/BTC'
+    bittrex:
+        fees:
+            buy: 0.002
+            sell: 0.002
+        USDSymbols:
+            BTC: 'BTC/USDT'
+        BTCSymbols:
+            ETH : 'ETH/BTC'
+    bitstamp:
+        fees:
+            buy: 0.002
+            sell: 0.002
+        USDSymbols:
+            BTC: 'BTC/USD'
+        BTCSymbols:
+            ETH : 'ETH/BTC'
+    huobipro:
+        fees:
+            buy: 0.002
+            sell: 0.002
+        USDSymbols:
+            BTC: 'BTC/USDT'
+        BTCSymbols:
+            ETH : 'ETH/BTC'
+
+strategyConfig:
+    TH:
+        thBuffer: 0.5
 
 database:
     host: ''

@@ -15,8 +15,8 @@ declare module 'exchange-types' {
     };
 
     export type TFees = {
-        taker: number;
-        maker: number;
+        buy: number;
+        sell: number;
     };
 
     export type TExchanges = Map<DPHExchange, TExchange>;

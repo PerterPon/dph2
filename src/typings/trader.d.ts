@@ -7,6 +7,7 @@ declare module 'trader-types' {
 
     export type TTradeAction = {
         tradeType: TradeType;
+        price: number;
         amount: number;
         standardCoin: StandardCoin;
         coin: DPHCoin;

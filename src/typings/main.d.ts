@@ -27,6 +27,11 @@ declare module 'main-types' {
     supportedStandard: Array<StandardCoin>;
     supportedExchange: Array<DPHExchange>;
     database: TDataBaseConfig;
+    strategyConfig: {
+      [strategName: string]: {
+        [configName: string] : any;
+      }
+    }
   };
 
   export type TProcessConfig = {
