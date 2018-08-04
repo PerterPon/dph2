@@ -21,7 +21,7 @@ build-test:
 
 test: build-test
 	cd $(TEST_FOLDER) && \
-	NODE_PATH=$(TEST_FOLDER) $(MOCHA) tests/test-*.js
+    NODE_PATH=$(TEST_FOLDER) $(MOCHA) tests/test-*.js
 
 test-test: build-test
 	cd $(TEST_FOLDER) && \
@@ -33,7 +33,7 @@ test-cov: build-test
 
 dev: build-ts
 	cd $(DIRNAME)/build && \
-	NODE_PATH=$(BUILD_FOLDER) DEBUG="true" node src/index.js --env dev
+	NODE_PATH=$(BUILD_FOLDER) DEBUG="true" proxychains4 node src/index.js --env dev
 	@echo "dev start success!"
 
 start: build-ts

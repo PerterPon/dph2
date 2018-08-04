@@ -6,10 +6,18 @@
 */
 
 import { TTradeActions } from 'trader-types';
-import { StandardCoin, DPHCoin, DPHExchange } from '../enums/main';
+import { StandardCoin, DPHCoin, DPHExchange, StrategyType } from '../enums/main';
 import { OrderBook } from 'ccxt';
 
+export interface DStrategy {
+    newActions( actions:TTradeActions ):void;
+}
+
 export abstract class BaseStrategy {
+
+    public delegate: DStrategy|null = null;
+
+    protected strategyType: StrategyType = StrategyType.UNKNOW;
 
     protected strategyConfig: {
         [name: string] : any
@@ -23,7 +31,7 @@ export abstract class BaseStrategy {
 
     }
 
-    public async updateOrderBook( standardCoin: StandardCoin, coin: DPHCoin, exchangeName: DPHExchange, orderBook: OrderBook ): Promise<TTradeActions|null> {
+    public updateOrderBook( standardCoin: StandardCoin, coin: DPHCoin, exchangeName: DPHExchange, orderBook: OrderBook ): void {
         throw new Error( `you must implement method: [updateOrderBook] for strategy:[${ ( <any>this ).__proto__.constructor.name }]` );
     }
 

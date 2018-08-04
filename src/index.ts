@@ -37,11 +37,14 @@ async function initOutFolder(): Promise<void> {
 main();
 
 process.on( 'uncaughtException', ( error: Error ) => {
-    const logger: Logger = getLogger();
-    logger.error( `uncaught exception\n${error.message}\n${error.stack}` );
+    console.log( error.message );
+    console.log( error.stack );
+    // const logger: Logger = getLogger();
+    // logger.error( `uncaught exception\n${error.message}\n${error.stack}` );
 } );
 
 process.on( 'unhandledRejection', ( reason: any, promise: Promise<any> ) => {
-    const logger: Logger = getLogger();
-    logger.error( `unhandled rejection, reason: [${ reason }]` );
+    console.log( reason );
+    // const logger: Logger = getLogger();
+    // logger.error( `unhandled rejection, reason: [${ reason }]` );
 } );

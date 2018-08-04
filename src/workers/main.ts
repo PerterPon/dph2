@@ -17,7 +17,7 @@ import { BasePricer } from 'src/pricers/base-pricer';
 import { CCXTPricer } from 'src/pricers/ccxt-pricer';
 
 // strategys
-import { BaseStrategy } from 'src/strategies/base-strategy';
+import { BaseStrategy, DStrategy } from 'src/strategies/base-strategy';
 import { THStrategy } from 'src/strategies/th-strategy';
 
 // traders
@@ -29,15 +29,32 @@ import { DPHCoin } from 'src/enums/main';
 
 import { TDPHConfig, TStrategySeries } from 'main-types';
 import { Logger } from 'log4js';
-import { OrderBook, Market } from 'ccxt';
-import { TTradeActions } from 'trader-types';
+import { OrderBook, Market, exchanges } from 'ccxt';
+import { TTradeActions, TTradeAction } from 'trader-types';
 import { TExchange, TMarkets } from 'exchange-types';
 
-export class MainWorker extends Worker {
+export class MainWorker extends Worker implements DStrategy {
     public name: ProcessName = ProcessName.MAIN;
 
     private pricers: Map<DPHExchange, BasePricer> = new Map();
     private strategies: Map<StrategyType, TStrategySeries> = new Map();
+
+    // ----------------- Delegate DSTrategy ------------------
+    public newActions( actions: TTradeActions ): void {
+        let strategyType: StrategyType = StrategyType.UNKNOW;
+        for( let oneAction of actions ) {
+            const action: TTradeAction = oneAction[ 1 ];
+            strategyType = action.strategyType;
+        }
+
+        const strategySeries:TStrategySeries|undefined = this.strategies.get( strategyType );
+        if ( undefined === strategySeries ) {
+            const log: Logger = getLogger();
+            log.warn( `tring to excute new action but can not found strategies: [${strategyType }]` );
+            return;
+        }
+        strategySeries.trader.trade( actions );
+    }
 
     // overwrite
     protected async start(): Promise<void> {
@@ -92,6 +109,9 @@ export class MainWorker extends Worker {
         log.info( 'all strategy and traders init done!' );
     }
 
+    /**
+     * start trade
+     */
     protected async startTrade(): Promise<void> {
         const log: Logger = getLogger();
         log.log( 'all init done! start trade ...' );
@@ -110,6 +130,11 @@ export class MainWorker extends Worker {
         }
     }
 
+    /**
+     * listen price
+     * @param standardCoin 
+     * @param coin 
+     */
     protected async listenPrice( standardCoin: StandardCoin, coin: DPHCoin ): Promise<void> {
         const log: Logger = getLogger();
 
@@ -131,14 +156,14 @@ export class MainWorker extends Worker {
 
                 for ( let [ strategy, strategySeries ] of strategies ) {
                     const strategier: BaseStrategy = strategySeries.strategy;
-                    const trader: BaseTrader = strategySeries.trader;
+                    // const trader: BaseTrader = strategySeries.trader;
 
-                    const action: TTradeActions|null = await strategier.updateOrderBook( standardCoin, coin, exchangeName, orderBook );
-                    if ( null === action ) {
-                        continue;
-                    }
+                    strategier.updateOrderBook( standardCoin, coin, exchangeName, orderBook );
+                    // if ( null === action ) {
+                    //     continue;
+                    // }
 
-                    await trader.trade( action );
+                    // await trader.trade( action );
                 }
             }
         }

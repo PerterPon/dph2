@@ -1,7 +1,7 @@
 
 declare module 'trader-types' {
 
-    import { TradeType, DPHExchange, StandardCoin, DPHCoin } from 'src/enums/main';
+    import { TradeType, DPHExchange, StandardCoin, DPHCoin, StrategyType } from 'src/enums/main';
 
     export type TTradeActions = Map<DPHExchange, TTradeAction>;
 
@@ -11,6 +11,7 @@ declare module 'trader-types' {
         amount: number;
         standardCoin: StandardCoin;
         coin: DPHCoin;
+        strategyType: StrategyType;
     }
 
 }

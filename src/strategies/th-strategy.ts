@@ -13,7 +13,7 @@ import { getExchange } from 'src/core/exchange';
 import { getLogger } from 'src/core/log';
 
 import { TTradeActions } from 'trader-types';
-import { StandardCoin, DPHCoin, DPHExchange, TradeType } from '../enums/main';
+import { StandardCoin, DPHCoin, DPHExchange, TradeType, StrategyType } from '../enums/main';
 import { OrderBook } from 'ccxt';
 import { TExchange, TFees } from 'exchange-types';
 import { TTHConfig } from 'strategy-types';
@@ -34,8 +34,9 @@ type BenefitResult = {
 export class THStrategy extends BaseStrategy {
 
     private scidMap: Map<string, exchangeObMap> = new Map();
+    protected strategyType: StrategyType = StrategyType.TH;
 
-    public async updateOrderBook( standardCoin: StandardCoin, coin: DPHCoin, exchangeName: DPHExchange, orderBook: OrderBook ): Promise<TTradeActions | null> {
+    public updateOrderBook( standardCoin: StandardCoin, coin: DPHCoin, exchangeName: DPHExchange, orderBook: OrderBook ): void {
 
         const scid: string = `${ standardCoin }_${ coin }`;
         const asks: Array<[ number, number ]> = orderBook.asks;
@@ -47,7 +48,7 @@ export class THStrategy extends BaseStrategy {
             obOrderBook.set( exchangeName, orderBook );
             this.scidMap.set( scid, obOrderBook );
             // first time to this scid, no need calculate benefit.
-            return null;
+            return;
         }
 
         let oldOrderBook: OrderBook|undefined = obOrderBook.get( exchangeName );
@@ -56,18 +57,18 @@ export class THStrategy extends BaseStrategy {
             undefined !== oldOrderBook &&
             ( true === _.isEqual( oldOrderBook.asks || [], asks ) && true === _.isEqual( oldOrderBook.bids || [], bids ) )
         ) {
-            return null;
+            return;
         }
 
         obOrderBook.set( exchangeName, orderBook );
         const benefitResult: BenefitResult|null = this.calculateBenefit( scid );
         if ( null === benefitResult ) {
-            return null;
+            return;
         }
 
         const { benefit, buyAmount, buyExchange, buyPrice, sellAmount, sellExchange, sellPrice } = benefitResult;
         if( 0 >= benefit ) {
-            return null;
+            return;
         }
 
         const log: Logger = getLogger();
@@ -76,25 +77,31 @@ export class THStrategy extends BaseStrategy {
             buy price: [${ buyPrice }] amount: [${ buyAmount }] exchange: [${ buyExchange }]
             sell price: [${ sellPrice }] amout: [${ sellPrice }] exchange: [${ sellExchange }]` ) );
 
-        const action: TTradeActions = new Map();
+        const actions: TTradeActions = new Map();
         // set buy action
-        action.set( <DPHExchange>buyExchange, {
+        actions.set( <DPHExchange>buyExchange, {
             tradeType: TradeType.BUY,
             price: buyPrice,
             amount: buyAmount,
             standardCoin,
-            coin
+            coin,
+            strategyType: this.strategyType
         } );
         // set sell action
-        action.set( <DPHExchange>sellExchange, {
+        actions.set( <DPHExchange>sellExchange, {
             tradeType: TradeType.SELL,
             price: sellPrice,
             amount: sellAmount,
             standardCoin,
-            coin
-        } )
+            coin,
+            strategyType: this.strategyType
+        } );
 
-        return action;
+        // dispatch actions
+        if ( null !== this.delegate ) {
+            this.delegate.newActions( actions );
+        }
+
     }
 
     private calculateBenefit( scid: string ): BenefitResult|null {
@@ -118,7 +125,6 @@ export class THStrategy extends BaseStrategy {
             const sellFees: number = fees.sell;
 
             const { asks, bids } = orderBook;
-            console.log( exchangeName, asks[ 0 ][ 0 ], bids[ 0 ][ 0 ] );
             if ( true === _.isArray( asks ) && 0 < asks.length ) {
                 const [ askPrice, askAmout ] = asks[ 0 ];
                 if ( askPrice < bestAsk ) {
@@ -146,24 +152,17 @@ export class THStrategy extends BaseStrategy {
 
         // buy price higher than sell price, just return;
         if ( bestAsk > bestBid ) {
-            console.log( 'ask > bid' );
-            console.log( bestAsk, bestBid );
             return null;
         }
 
         const totalFees: number = bestBid * bestBuyFees + bestAsk * bestSellFees;
         const customDistance: number = bestBid - bestAsk;
         const benefit: number = customDistance - totalFees * ( 1 + thBuffer );
-        log.info( `
-        best buy: [ ${ buyExchange } ] price: [${ bestAsk }]
-        best sell: [ ${ sellExchange } ] price: [ ${ bestBid } ]
-        ` );
-        log.info( `calculate benefit: [${ benefit }], distabce: [${ customDistance }], total fees: [${ totalFees }]` );
         if ( true ===  isNaN( benefit ) ) {
             return null
         }
 
-        return {
+        const result: BenefitResult = {
             benefit,
             buyAmount: bestAmount,
             buyPrice: bestAsk,
@@ -172,6 +171,8 @@ export class THStrategy extends BaseStrategy {
             sellPrice: bestBid,
             sellExchange: sellExchange
         };
+
+        return result;
     }
 
 }
